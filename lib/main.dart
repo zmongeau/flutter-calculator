@@ -12,10 +12,7 @@ class CalculatorApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Calculator',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
       home: const CalculatorScreen(),
     );
   }
@@ -69,7 +66,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     }
 
     // Prevent multiple operators in a row
-    if (_isOperator(value) && _expression.isNotEmpty && _isOperator(_expression[_expression.length - 1])) {
+    if (_isOperator(value) &&
+        _expression.isNotEmpty &&
+        _isOperator(_expression[_expression.length - 1])) {
       _expression = _expression.substring(0, _expression.length - 1) + value;
       return;
     }
@@ -79,7 +78,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   bool _isOperator(String char) {
-    return char == '+' || char == '-' || char == '*' || char == '/';
+    return char == '+' ||
+        char == '-' ||
+        char == '*' ||
+        char == '/' ||
+        char == '%';
   }
 
   void _updateResult() {
@@ -91,7 +94,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     try {
       // Only evaluate if the expression looks complete enough
       final trimmedExpression = _expression.trim();
-      if (trimmedExpression.isEmpty || _isOperator(trimmedExpression[trimmedExpression.length - 1])) {
+      if (trimmedExpression.isEmpty ||
+          _isOperator(trimmedExpression[trimmedExpression.length - 1])) {
         _result = '0';
         return;
       }
@@ -105,7 +109,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         if (value is double && value == value.toInt()) {
           _result = value.toInt().toString();
         } else if (value is double) {
-          _result = value.toStringAsFixed(10).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+          _result = value
+              .toStringAsFixed(10)
+              .replaceAll(RegExp(r'0+$'), '')
+              .replaceAll(RegExp(r'\.$'), '');
         } else {
           _result = value.toString();
         }
@@ -116,37 +123,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   void _calculateResult() {
-    if (_expression.isEmpty) {
-      return;
-    }
-
     try {
-      final trimmedExpression = _expression.trim();
-
-      // Check if expression ends with an operator
-      if (_isOperator(trimmedExpression[trimmedExpression.length - 1])) {
-        _hasError = true;
-        _result = 'Error';
-        return;
-      }
-
-      final expression = Expression.parse(trimmedExpression);
+      final expression = Expression.parse(_expression);
       final evaluator = const ExpressionEvaluator();
-      final value = evaluator.eval(expression, {});
-
-      if (value is num) {
-        String resultString;
-        if (value is double && value == value.toInt()) {
-          resultString = value.toInt().toString();
-        } else if (value is double) {
-          resultString = value.toStringAsFixed(10).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
-        } else {
-          resultString = value.toString();
-        }
-
-        _expression = '$_expression = $resultString';
-        _result = resultString;
-      }
+      var evalResult = evaluator.eval(expression, {});
+      _result = evalResult.toString();
     } catch (e) {
       _hasError = true;
       _result = 'Error';
@@ -156,10 +137,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Zack Mongeau'),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('Zack Mongeau'), elevation: 0),
       body: Column(
         children: [
           // Display
@@ -228,6 +206,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   _buildButton('=', Colors.green, Colors.white),
                   _buildWideButton('0', Colors.grey[300]!, Colors.black),
                   _buildButton('.', Colors.grey[300]!, Colors.black),
+                  _buildButton('%', Colors.blue, Colors.white),
                 ],
               ),
             ),
@@ -238,23 +217,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _buildButton(String label, Color bgColor, Color textColor) {
-    return Material(
-      color: bgColor,
-      borderRadius: BorderRadius.circular(8),
-      child: InkWell(
-        onTap: () => _onButtonPressed(label),
-        borderRadius: BorderRadius.circular(8),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 40,
-              fontWeight: FontWeight.bold,
-              color: textColor,
-            ),
-          ),
-        ),
-      ),
+    return ElevatedButton(
+      onPressed: () => _onButtonPressed(label),
+      style: ElevatedButton.styleFrom(backgroundColor: bgColor),
+      child: Text(label, style: TextStyle(color: textColor)),
     );
   }
 
